@@ -144,14 +144,14 @@
                             </div>
                         </div>
                         <div class="border-ccc"></div>
-                        <div class="abc" v-if="show_popup === index">
-                            <div class="abc-white">
+                        <div class="bopup" v-if="show_popup === index">
+                            <div class="bopup-white">
                                 <div style="font-family: Bold">CÔNG VIỆC ĐÃ THỰC HIỆN</div>
                                 <div style="color: #000" v-for="x in item.list_task" :key="x.task_id">{{ x.task_name }}</div>
                             </div>
                         </div>
-                        <div class="abc" v-if="show_problem === index">
-                            <div class="abc-white">
+                        <div class="bopup" v-if="show_problem === index">
+                            <div class="bopup-white">
                                 <div style="font-family: Bold">VẤN ĐỀ - GIẢI PHÁP</div>
                                 <div style="color: #000">{{ item.problem_solution }}</div>
                             </div>
@@ -195,13 +195,13 @@
                     </label>
                 </div>
                 <div style="font-family: semibold; margin-bottom: 10px">Ngày check-in kỳ sau sẽ là:</div>
-                <div class="popup-right-body-calendar">
+                <label class="popup-right-body-calendar">
                     <div class="popup-right-body-calendar-flex">
                         <img :src="imgSrc('lich.svg')" alt="" />
                         <flat-pickr v-model="date" />
                     </div>
                     <div style="font-family: semibold; color: #5aabfc">Chọn</div>
-                </div>
+                </label>
             </div>
         </div>
         <div class="popup-right-footer">
@@ -237,7 +237,6 @@ export default {
         avatar: String
     },
     emits: ['close'],
-
     data() {
         return {
             data_kr: [],
@@ -496,13 +495,7 @@ export default {
                     kr_id: kr_id
                 }
             })
-            if (res.success) {
-                this.selected_task = res.data.map(item => {
-                    return {
-                        ...item
-                    }
-                })
-            }
+            this.selected_task = res.data
         },
         clickpageAccount(data) {
             this[data] = !this[data]
@@ -607,7 +600,6 @@ export default {
         this.selectedKr()
         this.history()
     },
-
     computed: {
         isSuccess() {
             return this.data_kr.every(item => this.isInputFull(item))
@@ -1130,7 +1122,7 @@ $url: '/img/check-in/';
             padding: 6px;
         }
 
-        .abc {
+        .bopup {
             position: absolute;
             right: 0;
             bottom: 0;

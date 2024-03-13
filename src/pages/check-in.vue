@@ -4,9 +4,23 @@
         <div class="wrap-okr-header-square">
             <label class="wrap-okr-header-square-month">
                 <img :src="imgSrc('moment.svg')" alt="" />
-                05/02/2024
+                abc
             </label>
-            <Status :options="['Đã check in nháp', 'Chờ tổng kết', 'Tất cả']" :default="'Tất cả'" />
+            <!-- <Status :options="['Đã check in nháp', 'Chờ tổng kết', 'Tất cả']" :default="'Tất cả'" /> -->
+            <div class="wrap-okr-header-square-status">
+                <div class="popup-class selected" @click="clickpageAccount('open')">
+                    <div class="flexxxx">
+                        Trạng thái:
+                        <div style="font-family: Bold">{{ name }}</div>
+                    </div>
+                    <img :src="imgSrc('arrow.svg')" alt="" />
+                </div>
+                <div class="items" v-if="open">
+                    <div v-for="(option, i) of options" :key="i" class="items-name" @click="abc(option)">
+                        {{ option.title }}
+                    </div>
+                </div>
+            </div>
             <div class="wrap-okr-header-square-input">
                 <img :src="imgSrc('search.svg')" alt="" />
                 <input type="text" placeholder="Tìm kiếm mục tiêu..." v-model="search" />
@@ -24,7 +38,7 @@
                 <th class="wrap-okr-body-name">Hành động</th>
             </thead>
             <tbody>
-                <tr v-for="(item, index) in nameSearch" :key="index">
+                <tr v-for="(item, index) in updatingData" :key="index">
                     <td class="body-name">{{ item.object }}</td>
                     <td>
                         <div class="quantity">
@@ -115,7 +129,23 @@ export default {
             object_id: null,
             hidenn: '',
             okr: null,
-            avatar: null
+            avatar: null,
+            options: [
+                {
+                    title: 'Đã check in nháp'
+                },
+                {
+                    title: 'Chờ tổng kết'
+                },
+                {
+                    title: 'Chờ check in kỳ tiếp theo'
+                },
+                {
+                    title: 'Tất cả'
+                }
+            ],
+            name: 'Tất cả',
+            open: false
         }
     },
     methods: {
@@ -184,6 +214,21 @@ export default {
             this.hidenn = true
             this.okr = item.object_id
             this.avatar = item.owner_avatar
+        },
+        clickpageAccount(data) {
+            this[data] = !this[data]
+            if (this[data]) {
+                const closeFunction = event => {
+                    if (!event.target.closest('.popup-class')) {
+                        this[data] = false
+                        window.removeEventListener('click', closeFunction)
+                    }
+                }
+                window.addEventListener('click', closeFunction)
+            }
+        },
+        abc(option) {
+            this.name = option.title
         }
     },
     created() {
@@ -193,6 +238,19 @@ export default {
     computed: {
         nameSearch() {
             return this.data.filter(item => item.object.includes(this.search))
+        },
+        updatingData() {
+            return this.nameSearch.filter(item => {
+                if (this.name == 'Tất cả') {
+                    return []
+                } else if (this.name == 'Đã check in nháp') {
+                    return item.status === 'draft'
+                } else if (this.name == 'Chờ tổng kết') {
+                    return item.status === 'wait-final'
+                } else if (this.name == 'Chờ check in kỳ tiếp theo') {
+                    return item.status === 'wait-next'
+                }
+            })
         }
     }
 }
@@ -225,6 +283,58 @@ export default {
             background: #fff;
             cursor: pointer;
             font-family: Medium;
+        }
+
+        &-status {
+            display: inline-flex;
+            padding: 9px 10px;
+            align-items: center;
+            gap: 3px;
+            border-radius: 10px;
+            background: #fff;
+            cursor: pointer;
+            font-family: Medium;
+            position: relative;
+
+            .selected {
+                display: flex;
+                align-items: center;
+
+                .flexxxx {
+                    display: flex;
+                    gap: 6px;
+                }
+            }
+
+            .items {
+                color: #000;
+                border-radius: 0px 0px 6px 6px;
+                overflow: hidden;
+                position: absolute;
+                background-color: #fff;
+                top: 55px;
+                left: 0;
+                right: 0;
+                z-index: 1;
+                border-radius: 10px;
+                padding: 10px;
+                // width: 100%;
+
+                &-name {
+                    color: #333;
+                    padding-left: 1em;
+                    cursor: pointer;
+                    font-family: Bold;
+                    user-select: none;
+                    transition: all 0.2s;
+                    border-radius: 8px;
+                    padding: 10px;
+
+                    &:hover {
+                        background: #e0e0e0;
+                    }
+                }
+            }
         }
 
         &-input {
