@@ -7,9 +7,7 @@
                     {{ selected }}
                 </div>
             </div>
-            <div>
-                <img :src="imgSrc('arrow.svg')" alt="" />
-            </div>
+            <img :src="imgSrc('arrow.svg')" alt="" />
         </div>
         <div class="items" :class="{ selectHide: !open }">
             <div v-for="(option, i) of options" :key="i" @click="abc(option)">

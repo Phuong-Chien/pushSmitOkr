@@ -55,6 +55,7 @@ $url: '/img/menu/';
     display: flex;
     height: 100vh;
     width: 100vw;
+    overflow: hidden;
 }
 
 .menu {

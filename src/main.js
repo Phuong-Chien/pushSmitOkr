@@ -4,6 +4,10 @@ import App from './App.vue'
 import router from './router'
 import axios from 'axios'
 
+import Toast from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
+import VueApexCharts from 'vue3-apexcharts'
+
 let app = createApp(App)
 
 async function api(option) {
@@ -36,11 +40,19 @@ async function api(option) {
 app.config.globalProperties.$api = api
 
 app.use(router)
+app.use(Toast)
+app.use(VueApexCharts)
+
+import { useToast } from 'vue-toastification'
+const toast = useToast()
+
+app.config.globalProperties.$toast = toast
 
 api({
     path: '/auth/authentication'
 }).then(e => {
     localStorage.access_token = e.access_token
     // console.log(e)
+
     app.mount('#app')
 })

@@ -1,5 +1,5 @@
 <template>
-    <div class="wrap-okr-header" v-if="!aaa">
+    <div class="wrap-okr-header" v-if="!hidenn">
         <div class="wrap-okr-header-name">Chọn mục tiêu để check-in</div>
         <div class="wrap-okr-header-square">
             <label class="wrap-okr-header-square-month">
@@ -13,15 +13,15 @@
             </div>
         </div>
     </div>
-    <div class="wrap-okr-body" v-if="!aaa">
-        <table style="width: 100%">
+    <div class="wrap-okr-body" v-if="!hidenn">
+        <table style="width: 100%" id="data">
             <thead style="height: 34px; background: rgba(200, 231, 241, 0.4)">
-                <th class="wrap-okr-body-name" style="width: 45%; padding: 0 30px">Tên mục tiêu</th>
-                <th class="wrap-okr-body-name" style="min-width: 100px">Tiến độ</th>
+                <th class="wrap-okr-body-name" style="padding: 0 30px">Tên mục tiêu</th>
+                <th class="wrap-okr-body-name">Tiến độ</th>
                 <th class="wrap-okr-body-name">Check in kỳ sau</th>
                 <th class="wrap-okr-body-name">Người tham gia</th>
                 <th class="wrap-okr-body-name">Trạng thái</th>
-                <th class="wrap-okr-body-name" style="min-width: 100px">Hành động</th>
+                <th class="wrap-okr-body-name">Hành động</th>
             </thead>
             <tbody>
                 <tr v-for="(item, index) in nameSearch" :key="index">
@@ -38,26 +38,21 @@
                     <td>
                         <div class="flex-center">
                             <img class="flex-center-img" :src="item.owner_avatar" alt="" />
-
                             <div v-if="item.participant_id === null" class="flex-center-csss" @click="openCheckin(index)">
                                 <img class="flex-center-img" :src="item.participants[0].avatar" alt="" />
                                 <img :src="imgSrc('arrow.svg')" alt="" />
                             </div>
-
                             <div v-else>
                                 <img class="flex-center-img" :src="item.selected_parti.avatar" alt="" />
                             </div>
-
                             <!-- popup -->
                             <div class="flex-center-popup" v-if="openPopup === index">
                                 <label v-for="(item, index) in item.participants" :key="index" class="flex-center-popup-render">
-                                    <div class="flex-space">
-                                        <div>
-                                            <img class="flex-center-popup-render-img" :src="item.avatar" alt="" />
-                                            {{ item.name }}
-                                        </div>
-                                        <input type="radio" :value="item.id" v-model="selected" />
+                                    <div class="flex-alignt" style="gap: 6px">
+                                        <img class="flex-center-popup-render-img" :src="item.avatar" alt="" />
+                                        {{ item.name }}
                                     </div>
+                                    <input type="radio" :value="item.id" v-model="selected" />
                                 </label>
                                 <button style="margin-top: 5px; width: 100%" @click="confirm(item)" :disabled="selected.length < 1">Xác nhận</button>
                             </div>
@@ -73,7 +68,7 @@
                         </div>
                     </td>
                     <td>
-                        <div v-if="item.status === 'wait-next'">Chưa check-in</div>
+                        <div v-if="item.status === 'wait-next'">Chờ check-in kỳ tiếp theo</div>
                         <div v-else-if="item.status === 'draft'" class="flex-alignt">
                             <img :src="imgSrc('tichxanh.svg')" alt="" />
                             Đã check-in nháp
@@ -82,10 +77,12 @@
                             <img :src="imgSrc('mattroi.svg')" alt="" />
                             Chờ tổng kết
                         </div>
+                        <div v-else style="color: #ccc">Chưa có</div>
                     </td>
                     <td>
                         <div class="flex">
-                            <button class="flex-checkin" :disabled="item.participant_id === null" @click="toggleCheckin(index)">Check-in</button>
+                            <button class="flex-summary" v-if="item.status === 'wait-final' || item.percent_obj === '100'">Tổng kết</button>
+                            <button class="flex-checkin" v-else :disabled="item.participant_id === null" @click="toggleCheckin(item)">Check-in</button>
                             <img :src="imgSrc('chart.svg')" alt="" />
                         </div>
                     </td>
@@ -93,15 +90,15 @@
             </tbody>
         </table>
     </div>
-    <div v-if="aaa" style="display: flex; height: 100%">
-        <CheckinOkr />
+    <div v-if="hidenn" style="display: flex; height: 100%">
+        <CheckinOkr :id="okr" @close="hidenn = false" :avatar="avatar" />
     </div>
 </template>
 
 <script>
 import Status from '../components/Status.vue'
 import CheckinOkr from '../components/CheckinOkr.vue'
-import 'animate.css'
+// import 'animate.css'
 import moment from 'moment'
 export default {
     components: {
@@ -116,14 +113,15 @@ export default {
             hidden: false,
             selected: [],
             object_id: null,
-            aaa: ''
+            hidenn: '',
+            okr: null,
+            avatar: null
         }
     },
     methods: {
         imgSrc(name) {
             return '/img/check-in/' + name
         },
-
         async getListOkr() {
             let res = await this.$api({
                 url: '/list-okr',
@@ -141,14 +139,10 @@ export default {
                         ...item,
                         schedule_time: moment(item.schedule_time).format('DD-MM-YYYY'),
                         selected_parti
-                        // participant_id: null
                     }
                 })
                 return
             }
-
-            // console.log(res)
-            // this.data = res.data
         },
         openCheckin(index) {
             this.openPopup = index
@@ -183,18 +177,18 @@ export default {
 
             if (index > -1) {
                 this.nameSearch[index]['participant_id'] = this.selected
-                // console.log(this.nameSearch[index]['participant_id'])
                 return
             }
         },
-        toggleCheckin(index) {
-            this.aaa = index
+        toggleCheckin(item) {
+            this.hidenn = true
+            this.okr = item.object_id
+            this.avatar = item.owner_avatar
         }
     },
     created() {
         this.getListOkr()
     },
-    mounted() {},
 
     computed: {
         nameSearch() {
@@ -260,6 +254,7 @@ export default {
     &-name {
         color: #2d9cdb;
         font-family: Bold;
+        text-align: left;
     }
 
     .quantity {
@@ -301,10 +296,21 @@ export default {
             background: #fff;
             color: #2d9cdb;
             font-family: Bold;
+
             &:hover {
                 background: #efeff2;
             }
         }
+
+        &-summary {
+            border-radius: 6px;
+            background: #fff;
+            border: 1px solid #00bf00;
+            color: #26af69;
+        }
+    }
+    #data {
+        border-collapse: collapse;
     }
 
     tr {
@@ -313,7 +319,7 @@ export default {
 
     tr:nth-child(odd) {
         width: 100%;
-        height: 80px;
+        // height: 80px;
         flex-shrink: 0;
         background: rgba(255, 255, 255, 0.72);
     }
@@ -358,7 +364,8 @@ export default {
                 border-radius: 10px;
                 color: #333;
                 font-family: Bold;
-                width: 100%;
+                display: flex;
+                justify-content: space-between;
 
                 &:hover {
                     background: #f2f2f2;
