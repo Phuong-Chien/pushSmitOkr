@@ -6,7 +6,6 @@
                 <img :src="imgSrc('moment.svg')" alt="" />
                 abc
             </label>
-            <!-- <Status :options="['Đã check in nháp', 'Chờ tổng kết', 'Tất cả']" :default="'Tất cả'" /> -->
             <div class="wrap-okr-header-square-status">
                 <div class="popup-class selected" @click="clickpageAccount('open')">
                     <div class="flexxxx">
@@ -110,13 +109,10 @@
 </template>
 
 <script>
-import Status from '../components/Status.vue'
 import CheckinOkr from '../components/CheckinOkr.vue'
-// import 'animate.css'
 import moment from 'moment'
 export default {
     components: {
-        Status,
         CheckinOkr
     },
     data() {
