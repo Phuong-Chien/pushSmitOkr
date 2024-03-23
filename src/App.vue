@@ -21,7 +21,6 @@ export default {
             menu: [
                 {
                     title: 'Okrs',
-                    icon: 'okrmenu.svg',
                     to: '/'
                 },
                 {

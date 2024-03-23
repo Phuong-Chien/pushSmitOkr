@@ -1,119 +1,135 @@
 <template>
-    <div class="wrap-okr-header" v-if="!hidenn">
-        <div class="wrap-okr-header-name">Chọn mục tiêu để check-in</div>
-        <div class="wrap-okr-header-square">
-            <label class="wrap-okr-header-square-month">
-                <img :src="imgSrc('moment.svg')" alt="" />
-                abc
-            </label>
-            <div class="wrap-okr-header-square-status">
-                <div class="popup-class selected" @click="clickpageAccount('open')">
-                    <div class="flexxxx">
-                        Trạng thái:
-                        <div style="font-family: Bold">{{ name }}</div>
-                    </div>
-                    <img :src="imgSrc('arrow.svg')" alt="" />
-                </div>
-                <div class="items" v-if="open">
-                    <div v-for="(option, i) of options" :key="i" class="items-name" @click="abc(option)">
-                        {{ option.title }}
-                    </div>
-                </div>
-            </div>
-            <div class="wrap-okr-header-square-input">
-                <img :src="imgSrc('search.svg')" alt="" />
-                <input type="text" placeholder="Tìm kiếm mục tiêu..." v-model="search" />
-            </div>
-        </div>
-    </div>
-    <div class="wrap-okr-body" v-if="!hidenn">
-        <table style="width: 100%" id="data">
-            <thead style="height: 34px; background: rgba(200, 231, 241, 0.4)">
-                <th class="wrap-okr-body-name" style="padding: 0 30px">Tên mục tiêu</th>
-                <th class="wrap-okr-body-name">Tiến độ</th>
-                <th class="wrap-okr-body-name">Check in kỳ sau</th>
-                <th class="wrap-okr-body-name">Người tham gia</th>
-                <th class="wrap-okr-body-name">Trạng thái</th>
-                <th class="wrap-okr-body-name">Hành động</th>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in updatingData" :key="index">
-                    <td class="body-name">{{ item.object }}</td>
-                    <td>
-                        <div class="quantity">
-                            <div>{{ item.percent_obj }}%</div>
-                            <div class="quantity-grey">
-                                <div class="quantity-grey-green" :style="[{ width: item.percent_obj + '%' }, { background: item.percent_obj >= 80 ? '#27AE60' : item.percent_obj >= 31 ? '#F2C94C' : '#EB5757' }]"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>{{ item.schedule_time }}</td>
-                    <td>
-                        <div class="flex-center">
-                            <img class="flex-center-img" :src="item.owner_avatar" alt="" />
-                            <div v-if="item.participant_id === null" class="flex-center-csss" @click="openCheckin(index)">
-                                <img class="flex-center-img" :src="item.participants[0].avatar" alt="" />
+    <template v-if="!hidden_analysis">
+        <template v-if="!hiden_sumary">
+            <template v-if="!hidenn">
+                <div class="wrap-okr-header">
+                    <div class="wrap-okr-header-name">Chọn mục tiêu để check-in</div>
+                    <div class="wrap-okr-header-square">
+                        <label class="wrap-okr-header-square-month">
+                            <img :src="imgSrc('moment.svg')" alt="" />
+                            abc
+                        </label>
+                        <div class="wrap-okr-header-square-status">
+                            <div class="popup-class selected" @click="clickpageAccount('open')">
+                                <div class="flexxxx">
+                                    Trạng thái:
+                                    <div style="font-family: Bold">{{ name }}</div>
+                                </div>
                                 <img :src="imgSrc('arrow.svg')" alt="" />
                             </div>
-                            <div v-else>
-                                <img class="flex-center-img" :src="item.selected_parti.avatar" alt="" />
-                            </div>
-                            <!-- popup -->
-                            <div class="flex-center-popup" v-if="openPopup === index">
-                                <label v-for="(item, index) in item.participants" :key="index" class="flex-center-popup-render">
-                                    <div class="flex-alignt" style="gap: 6px">
-                                        <img class="flex-center-popup-render-img" :src="item.avatar" alt="" />
-                                        {{ item.name }}
-                                    </div>
-                                    <input type="radio" :value="item.id" v-model="selected" />
-                                </label>
-                                <button style="margin-top: 5px; width: 100%" @click="confirm(item)" :disabled="selected.length < 1">Xác nhận</button>
-                            </div>
-                        </div>
-                        <div class="abc" v-if="hidden" @click.self="hidden = false">
-                            <div class="abc-white">
-                                <div>
-                                    <div style="font-family: Bold">Xác nhận người check in</div>
-                                    <div style="font-family: Medium; width: 270px">Bạn sẽ không thể đổi người check-in cho mục tiêu này</div>
+                            <div class="items" v-if="open">
+                                <div v-for="(option, i) of options" :key="i" class="items-name" @click="showData(option)">
+                                    {{ option.title }}
                                 </div>
-                                <button @click="acceptOkr">Xác nhận</button>
                             </div>
                         </div>
-                    </td>
-                    <td>
-                        <div v-if="item.status === 'wait-next'">Chờ check-in kỳ tiếp theo</div>
-                        <div v-else-if="item.status === 'draft'" class="flex-alignt">
-                            <img :src="imgSrc('tichxanh.svg')" alt="" />
-                            Đã check-in nháp
+                        <div class="wrap-okr-header-square-input">
+                            <img :src="imgSrc('search.svg')" alt="" />
+                            <input type="text" placeholder="Tìm kiếm mục tiêu..." v-model="search" />
                         </div>
-                        <div v-else-if="item.status === 'wait-final'" class="flex-alignt">
-                            <img :src="imgSrc('mattroi.svg')" alt="" />
-                            Chờ tổng kết
-                        </div>
-                        <div v-else style="color: #ccc">Chưa có</div>
-                    </td>
-                    <td>
-                        <div class="flex">
-                            <button class="flex-summary" v-if="item.status === 'wait-final' || item.percent_obj === '100'">Tổng kết</button>
-                            <button class="flex-checkin" v-else :disabled="item.participant_id === null" @click="toggleCheckin(item)">Check-in</button>
-                            <img :src="imgSrc('chart.svg')" alt="" />
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <div v-if="hidenn" style="display: flex; height: 100%">
-        <CheckinOkr :id="okr" @close="hidenn = false" :avatar="avatar" />
+                    </div>
+                </div>
+                <div class="wrap-okr-body">
+                    <table style="width: 100%" id="data">
+                        <thead style="height: 34px; background: rgba(200, 231, 241, 0.4)">
+                            <th class="wrap-okr-body-name" style="padding: 0 30px">Tên mục tiêu</th>
+                            <th class="wrap-okr-body-name">Tiến độ</th>
+                            <th class="wrap-okr-body-name">Check in kỳ sau</th>
+                            <th class="wrap-okr-body-name">Người tham gia</th>
+                            <th class="wrap-okr-body-name">Trạng thái</th>
+                            <th class="wrap-okr-body-name">Hành động</th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in updatingData" :key="index">
+                                <td class="body-name">{{ item.object }}</td>
+                                <td>
+                                    <div class="quantity">
+                                        <div>{{ item.percent_obj }}%</div>
+                                        <div class="quantity-grey">
+                                            <div class="quantity-grey-green" :style="[{ width: item.percent_obj + '%' }, { background: item.percent_obj >= 80 ? '#27AE60' : item.percent_obj >= 31 ? '#F2C94C' : '#EB5757' }]"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.schedule_time }}</td>
+                                <td>
+                                    <div class="flex-center">
+                                        <img class="flex-center-img" :src="item.owner_avatar" alt="" />
+                                        <div v-if="item.participant_id === null" class="flex-center-csss" @click="openCheckin(index)">
+                                            <img class="flex-center-img" :src="item.participants[0].avatar" alt="" />
+                                            <img :src="imgSrc('arrow.svg')" alt="" />
+                                        </div>
+                                        <div v-else>
+                                            <img class="flex-center-img" :src="item.selected_parti.avatar" alt="" />
+                                        </div>
+                                        <!-- popup -->
+                                        <div class="flex-center-popup" v-if="openPopup === index">
+                                            <label v-for="(item, index) in item.participants" :key="index" class="flex-center-popup-render">
+                                                <div class="flex-alignt" style="gap: 6px">
+                                                    <img class="flex-center-popup-render-img" :src="item.avatar" alt="" />
+                                                    {{ item.name }}
+                                                </div>
+                                                <input type="radio" :value="item.id" v-model="selected" />
+                                            </label>
+                                            <button style="margin-top: 5px; width: 100%" @click="confirm(item)" :disabled="selected.length < 1">Xác nhận</button>
+                                        </div>
+                                    </div>
+                                    <div class="abc" v-if="hidden" @click.self="hidden = false">
+                                        <div class="abc-white">
+                                            <div>
+                                                <div style="font-family: Bold">Xác nhận người check in</div>
+                                                <div style="font-family: Medium; width: 270px">Bạn sẽ không thể đổi người check-in cho mục tiêu này</div>
+                                            </div>
+                                            <button @click="acceptOkr">Xác nhận</button>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div v-if="item.status === 'wait-next'">Chờ check-in kỳ tiếp theo</div>
+                                    <div v-else-if="item.status === 'draft'" class="flex-alignt">
+                                        <img :src="imgSrc('tichxanh.svg')" alt="" />
+                                        Đã check-in nháp
+                                    </div>
+                                    <div v-else-if="item.status === 'wait-final'" class="flex-alignt">
+                                        <img :src="imgSrc('mattroi.svg')" alt="" />
+                                        Chờ tổng kết
+                                    </div>
+                                    <div v-else style="color: #ccc">Chưa có</div>
+                                </td>
+                                <td>
+                                    <div class="flex">
+                                        <button class="flex-summary" v-if="item.status === 'wait-final' || item.percent_obj === 100" @click="openSummary(item)">Tổng kết</button>
+                                        <button class="flex-checkin" v-else :disabled="item.participant_id === null" @click="toggleCheckin(item)">Check-in</button>
+                                        <img :src="imgSrc('chart.svg')" alt="" style="cursor: pointer" @click="openAnalysis(item)" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+            <div v-else style="display: flex; height: 100%">
+                <CheckinOkr :id="okr" @close="hidenn = false" :avatar="avatar" />
+            </div>
+        </template>
+        <div v-else style="height: 100%">
+            <Summary :id="okr_id" @close="hiden_sumary = false" />
+        </div>
+    </template>
+    <div style="height: 100%; display: flex" v-else>
+        <Analysis :id_okr="id_okr" @close="hidden_analysis = false" />
     </div>
 </template>
 
 <script>
 import CheckinOkr from '../components/CheckinOkr.vue'
+import Summary from '../components/Summary.vue'
+import Analysis from '../components/Analysis.vue'
 import moment from 'moment'
 export default {
     components: {
-        CheckinOkr
+        CheckinOkr,
+        Summary,
+        Analysis
     },
     data() {
         return {
@@ -125,6 +141,8 @@ export default {
             object_id: null,
             hidenn: '',
             okr: null,
+            okr_id: null,
+            id_okr: null,
             avatar: null,
             options: [
                 {
@@ -141,7 +159,9 @@ export default {
                 }
             ],
             name: 'Tất cả',
-            open: false
+            open: false,
+            hiden_sumary: false,
+            hidden_analysis: false
         }
     },
     methods: {
@@ -223,8 +243,16 @@ export default {
                 window.addEventListener('click', closeFunction)
             }
         },
-        abc(option) {
+        showData(option) {
             this.name = option.title
+        },
+        openSummary(item) {
+            this.hiden_sumary = true
+            this.okr_id = item.object_id
+        },
+        openAnalysis(item) {
+            this.hidden_analysis = true
+            this.id_okr = item.object_id
         }
     },
     created() {

@@ -95,13 +95,13 @@
                     <div class="wrap-right-footer-btn">
                         <div style="font-family: semibold">Tự tin:</div>
                         <div class="for-button">
-                            <button class="for-button-hai" v-for="(item, index) in button_data" :key="index" :class="{ active: selection.confidence_level === item.key }" @click="clickData(item)">{{ item.title }}</button>
+                            <button class="for-button-hai" v-for="item in button_data" :key="item.key" :class="{ active: selection.confidence_level === item.key }" @click="selection.confidence_level = item.key">{{ item.title }}</button>
                         </div>
                     </div>
                     <div class="wrap-right-footer-btn">
                         <div style="font-family: semibold">Tốc dộ</div>
                         <div class="for-button">
-                            <button class="for-button-hai" v-for="(item, index) in button_slow" :key="index" @click="clickSlow(item)" :class="{ active: selection.progress_speed === item.key }">{{ item.title }}</button>
+                            <button class="for-button-hai" v-for="item in button_slow" :key="item.key" @click="selection.progress_speed = item.key" :class="{ active: selection.progress_speed === item.key }">{{ item.title }}</button>
                         </div>
                     </div>
                 </template>
@@ -172,13 +172,13 @@
             <div class="wrap-right-footer-btn">
                 <div style="font-family: semibold">Tự tin:</div>
                 <div class="for-button">
-                    <button class="for-button-hai" v-for="(item, index) in button_task" :key="index" :class="{ active: confidenceTask === item.keyResul }" @click="buttonTask(item)">{{ item.title }}</button>
+                    <button class="for-button-hai" v-for="item in button_task" :key="item.keyResul" :class="{ active: confidenceTask === item.keyResul }" @click="confidenceTask = item.keyResul">{{ item.title }}</button>
                 </div>
             </div>
             <div class="wrap-right-footer-btn" style="margin-top: 10px">
                 <div style="font-family: semibold">Tốc dộ</div>
                 <div class="for-button">
-                    <button class="for-button-hai" v-for="(item, index) in button_process" :key="index" :class="{ active: confidenceProcess === item.keyResul }" @click="buttonProcess(item)">{{ item.title }}</button>
+                    <button class="for-button-hai" v-for="item in button_process" :key="item.keyResul" :class="{ active: confidenceProcess === item.keyResul }" @click="confidenceProcess = item.keyResul">{{ item.title }}</button>
                 </div>
             </div>
             <div style="border-bottom: 1px dashed #ccc; margin-top: 65px"></div>
@@ -422,12 +422,6 @@ export default {
         imgSrc(name) {
             return '/img/check-in/' + name
         },
-        clickData(item) {
-            this.selection.confidence_level = item.key
-        },
-        clickSlow(item) {
-            this.selection.progress_speed = item.key
-        },
         backCheckin() {
             this.$emit('close')
         },
@@ -470,7 +464,7 @@ export default {
             this.kr = index + 1
             this.selection = item
             this.convert = false
-            this.selectedKr(item.id)
+            this.getTaskr(item.id)
             this.history(item.id)
         },
         isInputFull(item) {
@@ -486,7 +480,7 @@ export default {
             //             <img :src="imgSrc('icon_xam.svg')" alt="" />
             //         </div> -->
         },
-        async selectedKr(kr_id) {
+        async getTaskr(kr_id) {
             let res = await this.$api({
                 url: '/list-task',
                 method: 'POST',
@@ -549,14 +543,6 @@ export default {
             this.convert = true
             this.is_open = false
         },
-        // danh gia chung
-        buttonTask(item) {
-            this.confidenceTask = item.keyResul
-        },
-        buttonProcess(item) {
-            this.confidenceProcess = item.keyResul
-        },
-
         // lich su ky check-in
         async history(id_kr) {
             let res = await this.$api({
@@ -597,7 +583,7 @@ export default {
     },
     created() {
         this.getDataKr()
-        this.selectedKr()
+        this.getTaskr()
         this.history()
     },
     computed: {
@@ -784,7 +770,7 @@ $url: '/img/check-in/';
 
                     &-poisi {
                         position: absolute;
-                        right: -1px;
+                        right: 0;
                         background: #e7e6e6;
                         width: 50px;
                         height: 50px;
